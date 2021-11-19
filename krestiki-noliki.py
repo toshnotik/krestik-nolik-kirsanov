@@ -1,56 +1,66 @@
-print("Крестики-нолики")
 
-board = list(range(1,10))
+print("-Крестики нолики-")
 
-def draw_board(board):
-   print("-" * 13)
-   for i in range(3):
-      print("|", board[0+i*3], "|", board[1+i*3], "|", board[2+i*3], "|")
-      print("-" * 13)
+board = [["-"] * 3 for _ in range(3)]
+steps = 0
 
-def take_input(player_token):
-   valid = False
-   while not valid:
-      player_answer = input("Куда поставим " + player_token+"? ")
-      try:
-         player_answer = int(player_answer)
-      except:
-         print("Некорректный ввод. Вы уверены, что ввели число?")
-         continue
-      if player_answer >= 1 and player_answer <= 9:
-         if(str(board[player_answer-1]) not in "XO"):
-            board[player_answer-1] = player_token
-            valid = True
-         else:
-            print("Эта клетка уже занята!")
-      else:
-        print("Некорректный ввод. Введите число от 1 до 9.")
 
-def check_win(board):
-   win_coord = ((0,1,2), (3,4,5), (6,7,8), (0,3,6), (1,4,7), (2,5,8), (0,4,8), (2,4,6))
-   for each in win_coord:
-       if board[each[0]] == board[each[1]] == board[each[2]]:
-          return board[each[0]]
-   return False
+def show_board(f):
+    print('  0 1 2')
+    for i in range(len(board)):
+        print(str(i), *board[i])
 
-def main(board):
-    counter = 0
-    win = False
-    while not win:
-        draw_board(board)
-        if counter % 2 == 0:
-           take_input("X")
-        else:
-           take_input("O")
-        counter += 1
-        if counter > 4:
-           tmp = check_win(board)
-           if tmp:
-              print(tmp, "выиграл!")
-              win = True
-              break
-        if counter == 9:
-            print("Ничья!")
-            break
-    draw_board(board)
-main(board)
+
+def user_input(f):
+    while True:
+        step = input('Введите координаты хода: ').split()
+        if len(step) != 2:
+            print('Введите две координаты')
+            continue
+
+        if not(step[0].isdigit() and step[1].isdigit()):
+            print('Введите числа')
+            continue
+        x, y = map(int, step)
+
+        if not(x >= 0 and x < 3 and y >= 0 and y < 3):
+            print('Вышли из диапозона поля')
+            continue
+        if f[x][y] != '-':
+            print('Поле занято')
+            continue
+        break
+    return x, y
+
+
+def wins(f, user):
+    win = (((0, 0), (0, 1), (0, 2)), ((1, 0), (1, 1), (1, 2)), ((2, 0), (2, 1), (2, 2)),
+           ((0, 2), (1, 1), (2, 0)), ((0, 0), (1, 1), (2, 2)), ((0, 0), (1, 0), (2, 0)),
+           ((0, 1), (1, 1), (2, 1)), ((0, 2), (1, 2), (2, 2)))
+    for cord in win:
+        symbol = []
+        for i in cord:
+            symbol.append(f[i[0]][i[1]])
+        if symbol == [user, user, user]:
+            return True
+    return False
+
+
+while True:
+    if steps == 9:
+        print('Ничья')
+        break
+    if steps % 2 == 0:
+        user = 'X'
+    else:
+        user = 'O'
+    show_board(board)
+    x, y = user_input(board)
+    board[x][y] = user
+    if wins(board, user):
+        print(f'Выйграл {user}')
+        show_board(board)
+        break
+    steps += 1
+
+
